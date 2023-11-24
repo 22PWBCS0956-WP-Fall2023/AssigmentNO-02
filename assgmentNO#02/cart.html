@@ -1,0 +1,50 @@
+<!-- ... (Your HTML structure remains unchanged) -->
+
+<script>
+  // Function to fetch pricing details from book.json asynchronously
+  async function fetchBookData() {
+    try {
+      const response = await fetch('book.json'); // Assuming 'book.json' is in the same directory
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching book data:', error);
+      return [];
+    }
+  }
+
+  // Updated function to display cart items and manage cart functionalities
+  async function displayCartItems() {
+    const cartContent = document.getElementById('cart-content');
+    cartContent.innerHTML = '';
+
+    // Retrieve cart items from local storage
+    const cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+
+    // Fetch pricing details from book.json
+    const bookData = await fetchBookData();
+
+    // Iterate through the cart items
+    cartItems.forEach((cartItem) => {
+      const bookDetails = bookData.find((book) => book.title === cartItem.title);
+      if (bookDetails) {
+        const cartItemCard = document.createElement('div');
+        cartItemCard.classList.add('card', 'mb-2');
+        cartItemCard.innerHTML = `
+          <div class="card-body">
+            <h5 class="card-title">${cartItem.title}</h5>
+            <p class="card-text">Author: ${bookDetails.author}</p>
+            <p class="card-text">Price: $${bookDetails.price.toFixed(2)}</p>
+            <p class="card-text">Quantity: <input type="number" min="1" value="${cartItem.quantity}" onchange="updateQuantity('${cartItem.title}', this.value)"></p>
+            <button class="btn btn-danger" onclick="removeItem('${cartItem.title}')">Remove</button>
+          </div>
+        `;
+        cartContent.appendChild(cartItemCard);
+      }
+    });
+
+    updateTotalAmount(cartItems, bookData);
+  }
+
+  // ... (The rest of your JavaScript code remains unchanged) ...
+</script>
